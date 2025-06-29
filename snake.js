@@ -95,12 +95,13 @@ document.addEventListener("DOMContentLoaded", function() {
     class Food {
         constructor(canvas) {
             this.size = 20;
+            this.canvas = canvas;
             this.positionFood();
         }
 
         positionFood() {
-            this.x = Math.floor(Math.random() * (canvas.width / this.size)) * this.size;
-            this.y = Math.floor(Math.random() * (canvas.height / this.size)) * this.size;
+            this.x = Math.floor(Math.random() * (this.canvas.width / this.size)) * this.size;
+            this.y = Math.floor(Math.random() * (this.canvas.height / this.size)) * this.size;
         }
 
         draw(ctx) {
@@ -131,24 +132,31 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Game loop
-    setInterval(() => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        food.draw();
-        snake.update();
+    // Game loop - ensure ctx exists before starting
+    function startGameLoop() {
+        if (ctx) {
+            setInterval(() => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                food.draw(ctx);
+                snake.update();
 
-        if (snake.eat(food)) {
-            snake.growing = true;
-            food.positionFood();
+                if (snake.eat(food)) {
+                    snake.growing = true;
+                    food.positionFood();
+                }
+
+                snake.draw(ctx);
+
+                // Check for collision with walls or self
+                if (snake.checkCollision()) {
+                    alert('Game Over');
+                    snake.reset();
+                    food.positionFood();
+                }
+            }, 250);
+        } else {
+            console.error("Canvas context not found, game loop not started.");
         }
-
-        snake.draw(ctx);
-
-        // Check for collision with walls or self
-        if (snake.checkCollision()) {
-            alert('Game Over');
-            snake.reset();
-            food.positionFood();
-        }
-    }, 250);
+    }
+    startGameLoop();
 });

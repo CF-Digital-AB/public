@@ -1,0 +1,169 @@
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    /* Allow scrolling */
+    padding: 2rem 0;
+    display: block;
+    text-align: center;
+    overflow-x: hidden;
+}
+
+@keyframes move-twink-back {
+    from {background-position:0 0;}
+    to {background-position:-10000px 5000px;}
+}
+
+.stars, .twinkling, .clouds {
+    position:fixed; /* Use fixed to keep background in place on scroll */
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    width:100%;
+    height:100%;
+    display:block;
+}
+
+.stars {
+    background:#000 url(http://www.script-tutorials.com/demos/360/images/stars.png) repeat top center;
+    z-index:-3;
+}
+
+.twinkling{
+    background:transparent url(http://www.script-tutorials.com/demos/360/images/twinkling.png) repeat top center;
+    z-index:-2;
+    animation:move-twink-back 200s linear infinite;
+}
+
+.clouds{
+    background:transparent url(http://www.script-tutorials.com/demos/360/images/clouds.png) repeat top center;
+    z-index:-1;
+    opacity: 0.4;
+}
+
+main {
+    z-index: 1;
+    position: relative;
+    padding: 2rem;
+    max-width: 800px; /* Constrain width for better readability */
+    margin: 0 auto; /* Center the main content */
+}
+
+#logo {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 3rem;
+    margin: 0;
+}
+
+p {
+    font-size: 1.2rem;
+    color: #aaa;
+}
+
+.video-container {
+    margin-top: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border-radius: 10px;
+    overflow: hidden;
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    background-color: #000;
+}
+
+.video-container iframe {
+    border: none;
+    max-width: 100%;
+    vertical-align: bottom;
+}
+
+/* --- NEW STYLES FOR TRACKLIST --- */
+
+.tracklist-container {
+    margin-top: 2.5rem;
+    background-color: rgba(20, 20, 30, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1.5rem;
+    backdrop-filter: blur(5px);
+    text-align: left;
+}
+
+.tracklist-container h2 {
+    font-size: 2rem;
+    margin-top: 0;
+    color: #eee;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tracklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 40vh; /* Set a max height relative to viewport */
+    overflow-y: auto;
+}
+
+/* Custom scrollbar for Webkit browsers (Chrome, Safari) */
+.tracklist::-webkit-scrollbar {
+    width: 10px;
+}
+
+.tracklist::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.tracklist::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.tracklist::-webkit-scrollbar-thumb:hover {
+    background-color: #888;
+}
+
+.tracklist li {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 0.75rem;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.tracklist li:last-child {
+    border-bottom: none;
+}
+
+.tracklist li:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tracklist .timestamp {
+    color: #aaa;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    background-color: rgba(0,0,0,0.3);
+    padding: 3px 6px;
+    border-radius: 4px;
+}
+
+.tracklist .artist {
+    font-weight: bold;
+    color: #61dafb; /* A nice 'tech' blue */
+}
+
+.tracklist .title {
+    color: #eee;
+}

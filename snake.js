@@ -1,7 +1,18 @@
-// Snake game logic
+ // Snake game logic
 document.addEventListener("DOMContentLoaded", function() {
     const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    let ctx;
+    if (canvas) {
+        ctx = canvas.getContext('2d');
+    } else {
+        console.error("Canvas element not found.");
+        return;
+    }
+
+    if (!ctx) {
+        console.error("Failed to get canvas context.");
+        return;
+    }
 
     // Game variables
     let snake;
@@ -132,31 +143,24 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Game loop - ensure ctx exists before starting
-    function startGameLoop() {
-        if (ctx) {
-            setInterval(() => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                food.draw(ctx);
-                snake.update();
+    // Game loop
+    setInterval(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        food.draw(ctx);
+        snake.update();
 
-                if (snake.eat(food)) {
-                    snake.growing = true;
-                    food.positionFood();
-                }
-
-                snake.draw(ctx);
-
-                // Check for collision with walls or self
-                if (snake.checkCollision()) {
-                    alert('Game Over');
-                    snake.reset();
-                    food.positionFood();
-                }
-            }, 250);
-        } else {
-            console.error("Canvas context not found, game loop not started.");
+        if (snake.eat(food)) {
+            snake.growing = true;
+            food.positionFood();
         }
-    }
-    startGameLoop();
+
+        snake.draw(ctx);
+
+        // Check for collision with walls or self
+        if (snake.checkCollision()) {
+            alert('Game Over');
+            snake.reset();
+            food.positionFood();
+        }
+    }, 250);
 });

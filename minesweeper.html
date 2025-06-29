@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .game-container {
+            margin: 2rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .grid {
+            display: grid;
+            gap: 2px;
+            margin: 1rem 0;
+        }
+
+        .cell {
+            width: 30px;
+            height: 30px;
+            background-color: #eee;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+
+        .cell:hover {
+            background-color: #ddd;
+        }
+
+        .revealed {
+            background-color: #fff;
+        }
+
+        .mine {
+            background-color: #ff4444;
+        }
+
+        .controls {
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .messages {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Minesweeper</h1>
+        <div class="controls">
+            <button onclick="newGame()">New Game</button>
+        </div>
+        <div id="minefield" class="grid"></div>
+        <div class="messages" id="message"></div>
+    </div>
+
+    <script>
+        class Minesweeper {
+            constructor(rows = 10, cols = 10, mines = 10) {
+                this.rows = rows;
+                this.cols = cols;
+                this.mines = mines;
+                this.grid = [];
+                this.gameOver = false;
+                this.revealed = 0;
+                
+                // Initialize game
+                this.init();
+            }
+
+            init() {
+                // Create empty grid
+                this.grid = Array(this.rows).fill().map(() => 
+                    Array(this.cols).fill().map(() => ({
+                        isMine: false,
+                        revealed: false,
+                        neighborMines: 0
+                    }))
+                );
+
+                // Place mines
+                let minesPlaced = 0;
+                while (minesPlaced < this.mines) {
+                    const row = Math.floor(Math.random() * this.rows);
+                    const col = Math.floor(Math.random() * this.cols);
+                    
+                    if (!this.grid[row][col].isMine) {
+                        this.grid[row][col].isMine = true;
+                        minesPlaced++;
+                    }
+                }
+
+                // Calculate neighbor mines
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        if (!this.grid[row][col].isMine) {
+                            this.grid[row][col].neighborMines = this.countNeighborMines(row, col);
+                        }
+                    }
+                }
+
+                this.render();
+            }
+
+            countNeighborMines(row, col) {
+                let count = 0;
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const newRow = row + i;
+                        const newCol = col + j;
+                        
+                        if (
+                            newRow >= 0 && newRow < this.rows &&
+                            newCol >= 0 && newCol < this.cols &&
+                            this.grid[newRow][newCol].isMine
+                        ) {
+                            count++;
+                        }
+                    }
+                }
+                return count;
+            }
+
+            reveal(row, col) {
+                if (this.gameOver || this.grid[row][col].revealed) return;
+
+                if (this.grid[row][col].isMine) {
+                    this.gameOver = true;
+                    this.showMessage("Game Over: Mine Exploded!", "red");
+                    return;
+                }
+
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                cell.classList.add('revealed');
+                
+                if (this.grid[row][col].neighborMines > 0) {
+                    cell.textContent = this.grid[row][col].neighborMines;
+                }
+
+                this.revealed++;
+
+                // Reveal all adjacent cells if current cell has no neighbor mines
+                if (this.grid[row][col].neighborMines === 0) {
+                    for (let i = -1; i <= 1; i++) {
+                        for (let j = -1; j <= 1; j++) {
+                            const newRow = row + i;
+                            const newCol = col + j;
+                            
+                            if (
+                                newRow >= 0 && newRow < this.rows &&
+                                newCol >= 0 && newCol < this.cols &&
+                                !this.grid[newRow][newCol].revealed &&
+                                !this.grid[newRow][newCol].isMine
+                            ) {
+                                this.reveal(newRow, newCol);
+                            }
+                        }
+                    }
+                }
+
+                if (this.revealed === (this.rows * this.cols - this.mines)) {
+                    this.gameOver = true;
+                    this.showMessage("You Win!", "green");
+                }
+
+                this.updateRevealedCount();
+            }
+
+            click(event, row, col) {
+                if (event.button === 0) { // Left click
+                    this.reveal(row, col);
+                } else if (event.button === 2) { // Right click
+                    this.grid[row][col].isFlagged = !this.grid[row][col].isFlagged;
+                    this.render();
+                }
+            }
+
+            render() {
+                const gridElement = document.getElementById('minefield');
+                gridElement.innerHTML = '';
+
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        
+                        if (this.grid[row][col].isFlagged) {
+                            cell.innerHTML = '🚩';
+                            cell.classList.add('flagged');
+                        }
+
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        
+                        cell.addEventListener('click', (event) => this.click(event, row, col));
+                        
+                        gridElement.appendChild(cell);
+                    }
+                }
+
+                this.updateRevealedCount();
+            }
+
+            updateRevealedCount() {
+                const revealed = this.rows * this.cols - this.mines -
+                    this.grid.flat().filter(c => c.isFlagged && !c.revealed).length;
+                
+                document.getElementById('message').textContent = 
+                    `Revealed: ${revealed}/${this.rows * this.cols - this.mines}`;
+            }
+
+            countNeighborMines(row, col) {
+                let count = 0;
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const newRow = row + i;
+                        const newCol = col + j;
+                        
+                        if (
+                            newRow >= 0 && newRow < this.rows &&
+                            newCol >= 0 && newCol < this.cols &&
+                            this.grid[newRow][newCol].isMine
+                        ) {
+                            count++;
+                        }
+                    }
+                }
+                return count;
+            }
+
+            showMessage(message, color) {
+                const element = document.getElementById('message');
+                element.textContent = message;
+                element.style.color = color;
+                
+                setTimeout(() => {
+                    element.textContent = '';
+                    element.style.color = '';
+                }, 2000);
+            }
+        }
+
+        let game;
+
+        function newGame() {
+            // Clean up previous game
+            if (game) game.gameOver = true;
+
+            // Initialize new game
+            game = new Minesweeper();
+        }
+
+        newGame(); // Start the game on load
+    </script>
+</body>
+</html>
